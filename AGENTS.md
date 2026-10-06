@@ -1,8 +1,12 @@
 # AGENTS.md — working agreement for Hermex
 
-Hermex is a native SwiftUI iPhone app (Xcode target/scheme `HermesMobile`, App Store
-name `Hermex`) for a self-hosted `hermes-webui` server. `PROJECT_SPEC.md` is the
-product/API source of truth — if a request conflicts with it, stop and ask.
+This checkout contains Hermex's native SwiftUI iPhone app (Xcode target/scheme
+`HermesMobile`, App Store name `Hermex`) and a native Kotlin/Jetpack Compose Android
+port under `android/`. The Android port is maintained in this repository fork and
+talks to the same self-hosted `hermes-webui` server. `PROJECT_SPEC.md` is the shared
+product/API source of truth; Android-specific setup and build guidance lives in
+`android/README.md` and `.github/workflows/android-ci.yml`. If a request conflicts
+with the shared API contract, stop and ask.
 Read by every agent (Codex, Claude Code, …); keep it tool-agnostic.
 
 ## Session start & wrap-up
@@ -33,9 +37,12 @@ Read by every agent (Codex, Claude Code, …); keep it tool-agnostic.
    truth for exact JSON shapes, but may lag the release the docs describe (clone it
    if missing: `git clone https://github.com/nesquena/hermes-webui .codex-tmp/hermes-webui`).
    That upstream copy is read-only — never modify it (refreshing via `git pull` is fine).
-2. **No new third-party dependencies** beyond the spec's locked list without approval.
-3. **Tolerant decoding:** every `Codable` model uses optionals for fields upstream
-   might add/rename. Never crash on unknown fields.
+2. **No new third-party dependencies** beyond the approved project dependency lists
+   without approval. For Android, versions are managed in
+   `android/gradle/libs.versions.toml`.
+3. **Tolerant decoding:** Swift `Codable` models use optionals for fields upstream
+   might add or rename. Android JSON decoding must preserve the existing
+   `ignoreUnknownKeys` behavior in `HermesJson`; never crash on unknown fields.
 4. **No destructive commands** (`rm -rf`, `git push --force`, anything touching
    `~/Library/LaunchAgents/` or restarting Mac services). Suggest them; let the human run them.
 5. **Don't commit broken builds.** If a build or test fails, fix it before writing more code.
@@ -52,13 +59,23 @@ Read by every agent (Codex, Claude Code, …); keep it tool-agnostic.
   (see `TESTFLIGHT.md`) and strips entitlements, so Keychain writes fail with
   `errSecMissingEntitlement` and login breaks. Put the app on the sim via XcodeBuildMCP
   `build_run_sim` or a plain signed Debug build (no signing-disabling flags), then install/launch.
-- Before asking for review or committing a slice: run the full XCTest suite, and
-  build + launch the app for the human's manual simulator test when UI changed.
+- Android builds use the project Gradle Wrapper from `android/`, Java 17, and Android
+  SDK platform 36; do not install a global Gradle. Follow `android/README.md` and run
+  `./gradlew testDebugUnitTest lintDebug assembleDebug` from `android/`. Android CI
+  additionally runs managed-device tests on API 27, 35, and 36.
+- Before asking for review or committing code changes, run the full test suite for the
+  affected platform (the full XCTest suite for iOS; the Android Gradle checks above
+  for Android). For UI changes, build and launch the affected app in its simulator or
+  emulator for the human's manual test when available; if the required toolchain is
+  unavailable, state the blocker and do not claim the change was validated.
 
-## App identity (resolved via xcconfig — not grep-able)
-Bundle ID `com.uzairansar.hermesmobile` · tests `….tests` · Team `6GYD9C9N6R` · SKU `hermes-mobile-ios`.
+## App identity
+- iOS (resolved via xcconfig): bundle ID `com.uzairansar.hermesmobile` · tests
+  `….tests` · Team `6GYD9C9N6R` · SKU `hermes-mobile-ios`.
+- Android: application ID `com.uzairans.hermex`, defined in
+  `android/app/build.gradle.kts`.
 
-## "push to branch testflight" (maintainer-only)
+## iOS "push to branch testflight" (maintainer-only)
 Upload the current branch to the side-by-side **Hermex Branch** internal TestFlight app
 (`com.uzairansar.hermesmobile.branch`) — a TestFlight upload, **not** a git push.
 Requires the maintainer's App Store Connect access; contributors never need this. Use a
@@ -70,7 +87,7 @@ unless explicitly asked.
 - Surface tradeoffs in plain English before non-obvious choices; when in doubt, ask.
 - Ask before touching anything under the spec's "Open questions."
 - After each slice, report: (1) files changed (2) build/test command run (3) result
-  (4) next suggested step — plus a short manual simulator test plan when UI changed.
+  (4) next suggested step — plus a short manual simulator/emulator test plan when UI changed.
 
 ## Keep this file honest
 If something here surprises you or contradicts the project, tell the developer and

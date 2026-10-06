@@ -4,8 +4,12 @@ Issues and PRDs for this repo live as GitHub issues. Use the `gh` CLI for issue 
 
 ## Repository
 
-- GitHub repo: `uzairansaruzi/hermex`
-- Remote: `https://github.com/uzairansaruzi/hermex.git`
+- GitHub repo for this Android-port checkout: `Hungbocluaqua/hermex-android-port-hermes`
+- Remote: `https://github.com/Hungbocluaqua/hermex-android-port-hermes.git`
+
+This checkout is a fork. Do not assume the canonical iOS repository
+`uzairansaruzi/hermex` contains the `android/` tree; Android code issues and PRs
+belong to the Android-port repository above unless its maintainer directs otherwise.
 
 Infer the repo from `git remote -v` when possible; `gh` does this automatically when run inside the clone.
 
@@ -32,8 +36,8 @@ GitHub Issues are the work queue; pull requests are the review and merge record.
 - Push feature branches and open draft PRs only when the human asks to publish/open a PR.
 - Use the PR for review: GitHub/Copilot review, CI, external agent review, and human comments should live there when possible.
 - Address PR review comments by triaging them first; do not blindly accept automated review feedback.
-- Merge into `master` only after validation passes, review feedback is resolved, and the human approves.
-- Keep `master` buildable because it is the internal TestFlight candidate branch.
+- Merge into `master` only after validation passes, review feedback is resolved, and the maintainer approves.
+- Keep `master` buildable for the iOS release candidate and Android CI.
 
 ## Upstream Parity Tracking
 

@@ -5133,7 +5133,7 @@ private fun ReasoningAccessoryCard(
                 maxLines = 1,
             )
             Text(
-                summary,
+                reasoningInlineMarkdown(summary),
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.secondary,
@@ -5148,13 +5148,7 @@ private fun ReasoningAccessoryCard(
             )
         }
         if (expanded) {
-            SelectionContainer {
-                Text(
-                    trimmed,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-            }
+            MarkdownText(trimmed, modifier = Modifier.fillMaxWidth())
         }
     }
 }
